@@ -229,118 +229,6 @@ pub fn get_default_user_activities() -> Vec<Value> {
     activities
 }
 
-// 加载用户信息
-// pub fn load_user_info(user: &mut User) -> Result<(), TxParseError> {
-//     // 根据这个地址从gmgn中获取代币买卖活动(gmgn本身就只会获取一个账户和代币相关的活动)
-//     let activities = get_default_user_activities();
-//     let mut user_token_status = &mut user.token_stats;
-//
-//     for activity in activities.iter() {
-//         let mut tx_profit:f64 = 0.0;
-//         if let Some(token_info) = activity.get("token") {
-//             // 提取 `token.address`
-//             if let Some(address) = token_info.get("address").and_then(|v| v.as_str()) {
-//                 // 我们将从交易信息中提取代币状态，如果当前代币不存在，则插入，如果当前代币存在则修改。
-//                 /// 存在
-//                 if let Some(user_token_tradestats) = user_token_status.get_mut(&string_to_pub_key(address)) {
-//                     if let Some(event_type) = token_info.get("event_type").and_then(|v| v.as_str()) {
-//                         let timestamp = token_info
-//                             .get("timestamp")
-//                             .and_then(|v| v.as_u64())
-//                             .unwrap();
-//                         // 记录token买入信息
-//                         /// total_bought, bought_time, net_position
-//                         if event_type == "buy" {
-//                             if let Some(token_amount) =
-//                                 token_info.get("token_amount").and_then(|v| v.as_f64())
-//                             {
-//                                 user_token_tradestats.record_buy(token_amount, timestamp);
-//                             }
-//                         }
-//                         /// total_sold, net_position, sold_time, profit
-//                         else if event_type == "sell" {
-//                             if let Some(token_amount) =
-//                                 token_info.get("token_amount").and_then(|v| v.as_f64())
-//                             {
-//                                 let buy_cost = token_info
-//                                     .get("buy_cost_usd")
-//                                     .and_then(|v| v.as_f64())
-//                                     .ok_or(TxParseError::InvalidField(String::from("buy_cost_usd")))?;
-//                                 let sell_cost =
-//                                     token_info.get("cost_usd").and_then(|v| v.as_f64()).ok_or(TxParseError::InvalidField(String::from("cost_usd")))?;
-//                                 let profit = sell_cost - buy_cost;
-//                                 user_token_tradestats.record_sell(token_amount, timestamp, profit);
-//                                 /// 这里profit记录的就是当前当前钱包在sell一定量token的时候的净利润(可能是赚钱也可能是亏钱)
-//                                 if profit > 0.0 {
-//                                     user_token_tradestats.win_count += 1;
-//                                 } else if profit < 0.0 {
-//                                     user_token_tradestats.lose_count += 1;
-//                                 }
-//                                 user_token_tradestats.profit += profit;
-//                                 tx_profit = profit;
-//                             }
-//                         }
-//                     }
-//                 } else {
-//                     let mut token_status = TokenTradeStats::new(string_to_pub_key(address));
-//                     /// 不存在，相比于存在需要多记录代币的信息
-//                     token_status.token_mint = string_to_pub_key(address);
-//                     if let Some(symbol) = token_info.get("symbol").and_then(|v| v.as_str()) {
-//                         token_status.symbol = symbol.to_string();
-//                     };
-//                     user.distinct_token_count += 1;
-//                     if let Some(event_type) = token_info.get("event_type").and_then(|v| v.as_str()) {
-//                         let timestamp = token_info
-//                             .get("timestamp")
-//                             .and_then(|v| v.as_u64())
-//                             .unwrap();
-//                         // 记录token买入信息
-//                         /// total_bought, bought_time, net_position
-//                         if event_type == "buy" {
-//                             if let Some(token_amount) =
-//                                 token_info.get("token_amount").and_then(|v| v.as_f64())
-//                             {
-//                                 token_status.record_buy(token_amount, timestamp);
-//                             }
-//                         }
-//                         /// total_sold, net_position, sold_time, profit
-//                         else if event_type == "sell" {
-//                             if let Some(token_amount) =
-//                                 token_info.get("token_amount").and_then(|v| v.as_f64())
-//                             {
-//                                 let buy_cost = token_info
-//                                     .get("buy_cost_usd")
-//                                     .and_then(|v| v.as_f64())
-//                                     .ok_or(TxParseError::InvalidField(String::from("buy_cost_usd")))?;
-//                                 let sell_cost =
-//                                     token_info.get("cost_usd").and_then(|v| v.as_f64()).ok_or(TxParseError::InvalidField(String::from("cost_usd")))?;
-//                                 let profit = sell_cost - buy_cost;
-//                                 token_status.record_sell(token_amount, timestamp, profit);
-//                                 /// 这里profit记录的就是当前当前钱包在sell一定量token的时候的净利润(可能是赚钱也可能是亏钱)
-//                                 if profit > 0.0 {
-//                                     token_status.win_count += 1;
-//                                 } else if profit < 0.0 {
-//                                     token_status.lose_count += 1;
-//                                 };
-//                                 token_status.profit += profit;
-//                                 tx_profit = profit;
-//                             }
-//                         }
-//                     };
-//                     user_token_status.insert(string_to_pub_key(address), token_status);
-//                 }
-//             }
-//         };
-//
-//         /// 更新用户其他信息
-//         if let Some(tx_sig) = activity.get("tx_hash").and_then(|v| v.as_str()) {
-//             user.token_txs.push(tx_sig.to_string());
-//         }
-//         user.total_profit += tx_profit;
-//     }
-//     Ok(())
-// }
-
 // 主函数：加载用户信息
 pub fn load_user_info(user: &mut User) -> Result<(), TxParseError> {
     let activities = get_default_user_activities();
@@ -349,6 +237,8 @@ pub fn load_user_info(user: &mut User) -> Result<(), TxParseError> {
     for activity in activities.iter() {
         // 每条记录的利润先默认为0
         let mut tx_profit = 0.0;
+        // 成本
+        let mut cost = 0.0;
 
         // 1. 获取并处理 token 信息
         if let Some(token_info) = activity.get("token") {
@@ -369,8 +259,17 @@ pub fn load_user_info(user: &mut User) -> Result<(), TxParseError> {
                     user.distinct_token_count += 1;
 
                     // 处理 buy/sell
-                    tx_profit = handle_event_type(token_info, &mut token_status)?;
-
+                    let event_type = activity.get("event_type").and_then(|v| v.as_str());
+                    // 买入统计成本，卖出统计利润
+                    match event_type {
+                        Some("buy") => {
+                            cost = handle_event_type(activity, &mut token_status)?;
+                        }
+                        Some("sell") => {
+                            tx_profit = handle_event_type(activity, &mut token_status)?;
+                        }
+                        _ => {}
+                    }
                     // 插入 map
                     user_token_stats.insert(mint, token_status);
                 }
@@ -382,39 +281,40 @@ pub fn load_user_info(user: &mut User) -> Result<(), TxParseError> {
             user.token_txs.push(tx_sig.to_string());
         }
 
-        // 3. 更新用户总利润
+        // 3. 更新用户总利润/成本
         user.total_profit += tx_profit;
+        user.total_cost += cost;
     }
     Ok(())
 }
 
 /// 处理 "event_type" => buy/sell 并返回本次交易利润
-fn handle_event_type(token_info: &Value, stats: &mut TokenTradeStats) -> Result<f64, TxParseError> {
-    let event_type = token_info.get("event_type").and_then(|v| v.as_str());
-    let timestamp = token_info
+fn handle_event_type(
+    activity_info: &Value,
+    stats: &mut TokenTradeStats,
+) -> Result<f64, TxParseError> {
+    let event_type = activity_info.get("event_type").and_then(|v| v.as_str());
+    let timestamp = activity_info
         .get("timestamp")
         .and_then(|v| v.as_u64())
         .unwrap_or(0); // 或者用ok_or(...)?
 
     // 读取 token_amount
-    let token_amount = token_info
+    let token_amount = activity_info
         .get("token_amount")
         .and_then(|v| v.as_f64())
         .unwrap_or(0.0);
 
     match event_type {
+        // 买入统计成本，卖出统计利润
         Some("buy") => {
+            let buy_cost = parse_f64_from_string_field(activity_info, "cost_usd")?;
             stats.record_buy(token_amount, timestamp);
-            Ok(0.0) // 买入不产生利润
+            Ok(buy_cost) // 买入不产生利润
         }
         Some("sell") => {
-            let buy_cost = token_info.get("buy_cost_usd")
-                .and_then(|v| v.as_f64())
-                .ok_or_else(|| TxParseError::InvalidField("buy_cost_usd".to_string()))?;
-
-            let sell_cost = token_info.get("cost_usd")
-                .and_then(|v| v.as_f64())
-                .ok_or_else(|| TxParseError::InvalidField("cost_usd".to_string()))?;
+            let buy_cost = parse_f64_from_string_field(activity_info, "buy_cost_usd")?;
+            let sell_cost = parse_f64_from_string_field(activity_info, "cost_usd")?;
 
             let profit = sell_cost - buy_cost;
             stats.record_sell(token_amount, timestamp, profit);
@@ -436,6 +336,16 @@ fn handle_event_type(token_info: &Value, stats: &mut TokenTradeStats) -> Result<
     }
 }
 
+fn parse_f64_from_string_field(
+    data: &serde_json::Value,
+    field_name: &str,
+) -> Result<f64, TxParseError> {
+    data.get(field_name)
+        .and_then(|v| v.as_str()) // 先尝试获取字符串
+        .and_then(|s| s.parse::<f64>().ok()) // 再尝试解析为 f64
+        .ok_or_else(|| TxParseError::InvalidField(field_name.to_string())) // 如果失败，返回自定义错误
+}
+
 //
 pub fn analysis() -> Result<(), Error> {
     Ok(())
@@ -444,6 +354,7 @@ pub fn analysis() -> Result<(), Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::result;
 
     #[tokio::test]
     async fn test_get_history_tx2() {
@@ -467,5 +378,19 @@ mod tests {
         println!("sigs: {:?}", sigs);
         let result = collector.get_token_txs(&mut user).await.unwrap();
         println!("user : {:?}", user);
+    }
+
+    #[test]
+    pub fn test_load_user_info() {
+        dotenv().ok();
+        let address = get_default_address();
+        let mut user = User::new(address, 15);
+        let result = load_user_info(&mut user).unwrap();
+        // println!("user : {}", user);
+        let mut filter_addresses = vec![];
+        filter_addresses.push(string_to_pub_key(
+            "6xmiC8Gsp6i8owu3JMDpt38vsCGznCmW5Fzjuomqpump",
+        ));
+        user.display_with_filter(&filter_addresses);
     }
 }

@@ -7,5 +7,5 @@ pub enum Error {
 
 #[derive(Debug)]
 pub enum TxParseError {
-    InvalidField(String)
+    InvalidField(String),
 }
